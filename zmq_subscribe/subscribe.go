@@ -45,29 +45,37 @@ func main() {
 	} else {
 		recvFlag = zmq.DONTWAIT
 	}
+	var strMsg string
+	var strMsgMulti []string
+	var rawMsg []byte
+	var rawMsgMulti [][]byte
 	for {
-		if *multipart && *text {
-			msg, err := sock.RecvMessage(recvFlag)
-			if err != nil {
-				Exitf(2, "Could not receive bytes: %v", err)
-			}
-			for _, part := range msg {
+		switch {
+		case *multipart && *text:
+			strMsgMulti, err = sock.RecvMessage(recvFlag)
+		case *multipart:
+			rawMsgMulti, err = sock.RecvMessageBytes(recvFlag)
+		case *text:
+			strMsg, err = sock.Recv(recvFlag)
+		default:
+			rawMsg, err = sock.RecvBytes(recvFlag)
+		}
+		if err != nil {
+			Exitf(2, "Could not receive bytes: %v", err)
+		}
+		switch {
+		case *multipart && *text:
+			for _, part := range strMsgMulti {
 				fmt.Println(part)
 			}
-		} else if *multipart {
-			msg, err := sock.RecvMessageBytes(recvFlag)
-			if err != nil {
-				Exitf(2, "Could not receive bytes: %v", err)
-			}
-			for _, part := range msg {
+		case *multipart:
+			for _, part := range rawMsgMulti {
 				os.Stdout.Write(part)
 			}
-		} else if *text {
-			msg, err := sock.Recv(recvFlag)
-			if err != nil {
-				Exitf(2, "Could not receive bytes: %v", err)
-			}
-			fmt.Println(msg)
+		case *text:
+			fmt.Println(strMsg)
+		default:
+			os.Stdout.Write(rawMsg)
 		}
 	}
 }

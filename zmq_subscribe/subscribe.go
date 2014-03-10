@@ -1,13 +1,14 @@
 package main
 
 import (
-	zmq "github.com/pebbe/zmq4"
 	"flag"
-	"os"
 	"fmt"
+	"syscall"
+	zmq "github.com/pebbe/zmq4"
+	"os"
 )
 
-func Exitf(code int, format string, v... interface{}) {
+func Exitf(code int, format string, v ...interface{}) {
 	fmt.Fprintf(os.Stderr, "Fatal: ")
 	fmt.Fprintf(os.Stderr, format, v...)
 	os.Exit(code)
@@ -60,7 +61,7 @@ func main() {
 		default:
 			rawMsg, err = sock.RecvBytes(recvFlag)
 		}
-		if err != nil {
+		if err != nil && err != syscall.EAGAIN && err != syscall.EINTR {
 			Exitf(2, "Could not receive bytes: %v", err)
 		}
 		switch {

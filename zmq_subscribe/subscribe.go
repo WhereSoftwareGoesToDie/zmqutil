@@ -19,8 +19,8 @@ func main() {
 	text := flag.Bool("text", false, "Read messages as strings.")
 	multipart := flag.Bool("multipart", false, "Read multipart messages and print the parts individually.")
 	flag.Usage = func() {
-		Exitf(2, "Usage of %s:\n", os.Args[0])
-		Exitf(2, "%s <zmq_endpoint> [opts]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "%s <zmq_endpoint> [opts]\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	flag.Parse()

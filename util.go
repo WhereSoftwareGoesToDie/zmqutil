@@ -32,3 +32,76 @@ func RetryRecvMessageBytes(sock *zmq.Socket, flags zmq.Flag) ([][]byte, error) {
 	}
 	return b, err
 }
+
+
+// RetryRecv retries a Recv call until successful or a non-retryable
+// error code is returned.
+func RetryRecv(soc *zmq.Socket, flags zmq.Flag) (string, error) {
+	var err error
+	err = syscall.EAGAIN
+	var data string
+	for IsRetryError(err) {
+		data, err = soc.Recv(flags)
+	}
+	return data, err
+}
+
+// RetryRecvMessage retries a RecvMessage call until successful or a
+// non-retryable error code is returned.
+func RetryRecvMessage(soc *zmq.Socket, flags zmq.Flag) ([]string, error) {
+	var err error
+	err = syscall.EAGAIN
+	var data []string
+	for IsRetryError(err) {
+		data, err = soc.RecvMessage(flags)
+	}
+	return data, err
+}
+
+// RetryRecvBytes retries a RecvBytes call until successful or a
+// non-retryable error code is returned.
+func RetryRecvBytes(soc *zmq.Socket, flags zmq.Flag) ([]byte, error) {
+	var err error
+	err = syscall.EAGAIN
+	var data []byte
+	for IsRetryError(err) {
+		data, err = soc.RecvBytes(flags)
+	}
+	return data, err
+}
+
+// RetrySend retries a Send call until successful or a non-retryable
+// error code is returned.
+func RetrySend(soc *zmq.Socket, data string, flags zmq.Flag) (int, error) {
+	var err error
+	err = syscall.EAGAIN
+	var written int
+	for IsRetryError(err) {
+		written, err = soc.Send(data, flags)
+	}
+	return written, err
+}
+
+// RetrySendMessage retries a SendMessage call until successful or a
+// non-retryable error code is returned.
+func RetrySendMessage(soc *zmq.Socket, parts ...interface{}) (int, error) {
+	var err error
+	err = syscall.EAGAIN
+	var written int
+	for IsRetryError(err) {
+		written, err = soc.SendMessage(parts...)
+	}
+	return written, err
+}
+
+// RetrySendBytes retries a SendBytes call until successful or a
+// non-retryable error code is returned.
+func RetrySendBytes(soc *zmq.Socket, data []byte, flags zmq.Flag) (int, error) {
+	var err error
+	err = syscall.EAGAIN
+	var written int
+	for IsRetryError(err) {
+		written, err = soc.SendBytes(data, flags)
+	}
+	return written, err
+}
